@@ -26,7 +26,7 @@ Access: `http://femtocam.local/` or `http://192.168.4.1/`
 
 ## Wait, what's FEMTO?
 
-**FEMTO** is a budget 3D printer building competition held by the [DCinside 3D Printing Minor Gallery](https://gall.dcinside.com/mgallery/board/lists/?id=3dprinter), a Korean 3D printing community.
+**FEMTO** is a budget 3D printer building competition held by the [DCinside 3D Printing Minor Gallery](https://gall.dcinside.com/mgallery/board/lists/?id=3dprinting), a Korean 3D printing community.
 
 There was once a printer sold in Korea under the name "Sondori Pico" (an Easythreed rebrand). Its quality was so toy-like that it became a meme — whenever someone called a printer cheap, the community would say "at least it's better than Pico."
 
@@ -182,6 +182,6 @@ Copyright (c) 2025 Gorogepapa (meph6346@gmail.com)
 ---
 
 <p align="center">
-  <sub>FEMTOCAM began at the <a href="https://gall.dcinside.com/mgallery/board/lists/?id=3dprinter">Dcinside 3D Printing Minor Gallery</a> FEMTO competition.</sub><br>
+  <sub>FEMTOCAM began at the <a href="https://gall.dcinside.com/mgallery/board/lists/?id=3dprinting">Dcinside 3D Printing Minor Gallery</a> FEMTO competition.</sub><br>
   <sub>Smaller than Pico, cheaper than Pico, but actually works.</sub>
 </p>
