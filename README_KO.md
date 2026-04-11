@@ -17,6 +17,10 @@
 
 ## FEMTOCAM이 뭔가요?
 
+<p align="center">
+  <img src="docs/images/20260411_235314.gif" width="640"></p>
+
+
 ESP32-CAM 보드 하나와 MicroSD 카드만으로 완성되는 WiFi 카메라 모듈입니다. 브라우저에서 바로 접속해서 실시간 스트리밍을 보고, 타임랩스를 녹화하고, 파일을 관리할 수 있습니다.
 
 - **실시간 스트리밍** — MJPEG, QVGA / VGA / SVGA
