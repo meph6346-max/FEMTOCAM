@@ -1,6 +1,3 @@
-[README(ENG)](README.md) / [README(한국어)](README_KO.md)
-
-
 # FEMTOCAM
 
 <p align="center">
@@ -64,7 +61,7 @@ FEMTOCAM started from that example and:
 3. **Added file management** — Download, delete, and rename recordings from the browser
 4. **Redesigned** — Mainsail-inspired dark theme that feels at home next to your printer
 
-The result: zero external libraries, 1,100 lines, a standalone module that gives Marlin printers timelapse capability without an SBC.
+The result: zero external libraries, 1,084 lines, a standalone module that gives Marlin printers timelapse capability without an SBC.
 
 ---
 
@@ -125,10 +122,11 @@ Every setting includes a one-line description for those wondering "what does thi
 | Item | Detail |
 |------|--------|
 | Platform | AI Thinker ESP32-CAM |
-| Code | ~1,100 lines · 6 files · **zero** external libraries |
-| HTTP | Port 80 unified · 22 endpoints |
+| Code | 1,084 lines · 4 files · **zero** external libraries |
+| HTTP | Web port 80 · Stream port 81 · 23 endpoints |
 | Resolution | QVGA 320×240 · VGA 640×480 · SVGA 800×600 |
 | Storage | MicroSD (MMC 1-bit) · MJPEG AVI |
+| Language | English / Korean |
 
 ---
 
@@ -138,7 +136,7 @@ Every setting includes a one-line description for those wondering "what does thi
 
 Flash pre-built firmware directly — no compiling needed.
 
-👉 **[Easy Install Guide](docs/INSTALL_EASY_EN.md)**
+👉 **[Easy Install Guide](docs/INSTALL_EASY_KO.md)**
 
 You need: **ESP32-CAM-MB** + MicroSD + USB cable
 
@@ -146,7 +144,7 @@ You need: **ESP32-CAM-MB** + MicroSD + USB cable
 
 Build from source. For those who want to modify the code.
 
-👉 **[Developer Install Guide](docs/INSTALL_DEV_EN.md)**
+👉 **[Developer Install Guide](docs/INSTALL_DEV_KO.md)**
 
 You need: VS Code + PlatformIO + Git
 
@@ -157,7 +155,6 @@ You need: VS Code + PlatformIO + Git
 - VGA/SVGA streaming may be limited to ~7fps depending on WiFi conditions
 - Single streaming client at a time
 - NTP time sync only in STA mode (AP mode uses sequential filenames)
-- No real-time watermark (ESP32 performance constraint)
 - If WiFi is unstable, try disconnecting the MB dock and powering via 5V/GND pins directly
 
 ---
@@ -166,13 +163,7 @@ You need: VS Code + PlatformIO + Git
 
 This project was built by a non-developer through **vibe coding with Claude AI**. Architecture design, firmware, web UI, and hardware debugging — the entire process was done in conversation with AI.
 
-Automated bug testing (10 rounds, 100+ checks) and real hardware verification were performed, but unexpected bugs may still exist. Feel free to open an issue if you find one.
-
----
-
-## Translation
-
-Add a new language by editing a single file: `lang.h`. Currently supports English and Korean.
+Tested on real ESP32-CAM hardware, but unexpected bugs may still exist. Feel free to open an issue if you find one.
 
 ---
 
@@ -185,6 +176,6 @@ Copyright (c) 2025 Gorogepapa (meph6346@gmail.com)
 ---
 
 <p align="center">
-  <sub>FEMTOCAM began at the <a href="https://gall.dcinside.com/mgallery/board/lists/?id=3dprinting">Dcinside 3D Printing Minor Gallery</a> FEMTO competition.</sub><br>
+  <sub>FEMTOCAM began at the <a href="https://gall.dcinside.com/mgallery/board/lists/?id=3dprinting">DC 3D Printing Minor Gallery</a> FEMTO competition.</sub><br>
   <sub>Smaller than Pico, cheaper than Pico, but actually works.</sub>
 </p>
