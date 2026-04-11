@@ -3,8 +3,7 @@
 # FEMTOCAM
 
 <p align="center">
-  <img src="docs/images/logo.png" width="420"><br>
-  <sub>Zero external libraries · 1,084 lines of code · Just open a browser</sub>
+  <img src="docs/images/logo.png" width="420">
 </p>
 
 <p align="center">
@@ -16,6 +15,10 @@
 ---
 
 ## What is FEMTOCAM?
+
+<p align="center">
+  <img src="docs/images/20260411_235314.gif" width="640"></p>
+
 
 A WiFi camera module built with just an ESP32-CAM board and a MicroSD card. Open a browser, watch a live stream, record timelapses, and manage files — all from your phone or PC.
 
