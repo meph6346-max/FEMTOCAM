@@ -1,12 +1,17 @@
-[README(ENG)](README.md) / [README(한국어)](README_KO.md)
+[README (ENG)](README.md) / [README (한국어)](README_KO.md)
 
 # FEMTOCAM
 
 <p align="center">
-  <strong>ESP32 Streaming & Timelapse Camera</strong>
+  <img src="docs/images/logo.png" width="420"><br>
+  <sub>Zero external libraries · 1,084 lines of code · Just open a browser</sub>
 </p>
 
-<!-- TODO: Add screenshots -->
+<p align="center">
+  <img src="docs/images/01_camera.jpg" width="270">
+  <img src="docs/images/04_recording.jpg" width="270">
+  <img src="docs/images/08_korean.jpg" width="270">
+</p>
 
 ---
 
@@ -28,9 +33,14 @@ Access: `http://femtocam.local/` or `http://192.168.4.1/`
 
 ## Wait, what's FEMTO?
 
-**FEMTO** is a budget 3D printer building competition held by the [DCinside 3D Printing Minor Gallery](https://gall.dcinside.com/mgallery/board/lists/?id=3dprinting), a Korean 3D printing community.
+**FEMTO** is a budget 3D printer building competition held by the [DCinside 3D Printing Minor Gallery](https://gall.dcinside.com/mgallery/board/lists/?id=3dprinter), a Korean 3D printing community.
 
 There was once a printer sold in Korea under the name "Sondori Pico" (an Easythreed rebrand). Its quality was so toy-like that it became a meme — whenever someone called a printer cheap, the community would say "at least it's better than Pico."
+
+<p align="center">
+  <img src="docs/images/sondori_pico.png" width="300"><br>
+  <sub>The legendary Sondori Pico</sub>
+</p>
 
 FEMTO pays homage to that Pico — the challenge is to build a printer that's **even cheaper than Pico, but actually works**. The name comes from the SI prefix: Pico is 10⁻¹², Femto is 10⁻¹⁵. Smaller, cheaper, yet functional.
 
@@ -64,6 +74,31 @@ FEMTOCAM started from that example and:
 4. **Redesigned** — Mainsail-inspired dark theme that feels at home next to your printer
 
 The result: zero external libraries, 1,084 lines, a standalone module that gives Marlin printers timelapse capability without an SBC.
+
+---
+
+## Screenshots
+
+### STA Mode (WiFi connected)
+
+| Camera | Files | Settings |
+|:---:|:---:|:---:|
+| <img src="docs/images/01_camera.jpg" width="250"> | <img src="docs/images/02_files.jpg" width="250"> | <img src="docs/images/03_settings_sta.jpg" width="250"> |
+| Live stream & recording controls | NTP-based filenames, DL/REN/DEL | Network info, 4 settings sections |
+
+### Recording & Korean
+
+| Recording | Korean mode |
+|:---:|:---:|
+| <img src="docs/images/04_recording.jpg" width="250"> | <img src="docs/images/08_korean.jpg" width="250"> |
+| REC badge, frame counter, elapsed time | Toggle language with KO/EN button |
+
+### AP Mode (First boot)
+
+| AP Camera | WiFi Setup | WiFi Scan |
+|:---:|:---:|:---:|
+| <img src="docs/images/05_ap_mode.jpg" width="250"> | <img src="docs/images/06_ap_settings.jpg" width="250"> | <img src="docs/images/07_wifi_scan.jpg" width="250"> |
+| Connect to 192.168.4.1, AP badge | Scan → enter SSID/PW → Save & reboot | Nearby networks with OPEN indicator |
 
 ---
 
@@ -138,7 +173,7 @@ Every setting includes a one-line description for those wondering "what does thi
 
 Flash pre-built firmware directly — no compiling needed.
 
-👉 **[Easy Install Guide](docs/INSTALL_EASY_KO.md)**
+👉 **[Easy Install Guide (ENG)](docs/INSTALL_EASY_EN.md)** · [한국어](docs/INSTALL_EASY_KO.md)
 
 You need: **ESP32-CAM-MB** + MicroSD + USB cable
 
@@ -146,7 +181,7 @@ You need: **ESP32-CAM-MB** + MicroSD + USB cable
 
 Build from source. For those who want to modify the code.
 
-👉 **[Developer Install Guide](docs/INSTALL_DEV_KO.md)**
+👉 **[Developer Install Guide (ENG)](docs/INSTALL_DEV_EN.md)** · [한국어](docs/INSTALL_DEV_KO.md)
 
 You need: VS Code + PlatformIO + Git
 
@@ -178,6 +213,6 @@ Copyright (c) 2025 Gorogepapa (meph6346@gmail.com)
 ---
 
 <p align="center">
-  <sub>FEMTOCAM began at the <a href="https://gall.dcinside.com/mgallery/board/lists/?id=3dprinting">DC 3D Printing Minor Gallery</a> FEMTO competition.</sub><br>
+  <sub>FEMTOCAM began at the <a href="https://gall.dcinside.com/mgallery/board/lists/?id=3dprinter">DC 3D Printing Minor Gallery</a> FEMTO competition.</sub><br>
   <sub>Smaller than Pico, cheaper than Pico, but actually works.</sub>
 </p>
