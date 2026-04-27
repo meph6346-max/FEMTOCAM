@@ -13,6 +13,7 @@
 #include "config.h"
 #include "avi_writer.h"
 #include "web_ui.h"
+#include "hostname_util.h"
 
 // ======== Log Ring Buffer ========
 char logBuf[LOG_BUF_LINES][LOG_LINE_MAX];
@@ -39,7 +40,7 @@ void logMsg(uint8_t level, const char* fmt, ...) {
 Preferences prefs;
 httpd_handle_t hStream = NULL, hCtrl = NULL;
 AviWriter avi;
-bool isAP = false, flash_on = false, sd_ok = false, ntpOK = false;
+bool isAP = false, flash_on = false, sd_ok = false, ntpOK = false, mdns_ok = false;
 unsigned long bootMs = 0;
 CamParams cam = CAM_DEFAULTS;
 RecParams rp = REC_DEFAULTS;
@@ -112,6 +113,11 @@ void loadCfg() {
     cfg.lang = prefs.getUChar(K_LANG, 0);
     prefs.end();
     if (cfg.res >= RES_COUNT) cfg.res = DEF_RES;
+    {
+        char hs[HOSTNAME_MAX_LABEL + 1];
+        sanitizeHostname(cfg.host.c_str(), hs, sizeof(hs), "femtocam");
+        cfg.host = hs;
+    }
     if (cfg.capMs < 42) cfg.capMs = 42;
     if (cfg.capMs > 3600000UL) cfg.capMs = 3600000UL;
     if (cfg.pbFps < 1) cfg.pbFps = 1;
@@ -128,6 +134,28 @@ void saveCfg() {
     prefs.end();
 }
 
+// ======== mDNS ========
+// Tear down any previous responder and (re)announce the HTTP service. Safe to call
+// repeatedly: required after WiFi reconnect or mode change because the underlying
+// netif handle changes and the previous responder becomes a no-op.
+void startMDNS() {
+    if (mdns_ok) { MDNS.end(); mdns_ok = false; }
+    char host[HOSTNAME_MAX_LABEL + 1];
+    size_t hn = sanitizeHostname(cfg.host.c_str(), host, sizeof(host), "femtocam");
+    if (hn == 0) { logMsg(1, "[mDNS] empty hostname, skip"); return; }
+    if (strcmp(host, cfg.host.c_str()) != 0) {
+        logMsg(1, "[mDNS] hostname normalized: '%s' -> '%s'", cfg.host.c_str(), host);
+        cfg.host = host;
+    }
+    if (MDNS.begin(host)) {
+        MDNS.addService("http", "tcp", PORT_CTRL);
+        mdns_ok = true;
+        logMsg(1, "[mDNS] OK http://%s.local:%d/", host, PORT_CTRL);
+    } else {
+        logMsg(1, "[mDNS] begin FAIL host=%s", host);
+    }
+}
+
 // ======== WiFi ========
 void setupWiFi() {
     WiFi.persistent(false); WiFi.setSleep(false);
@@ -142,7 +170,7 @@ void setupWiFi() {
         if (WiFi.status() == WL_CONNECTED) {
             isAP = false; ledOff();
             logMsg(1, "[WiFi] OK: %s RSSI:%d", WiFi.localIP().toString().c_str(), WiFi.RSSI());
-            if (MDNS.begin(cfg.host.c_str())) MDNS.addService("http", "tcp", PORT_CTRL);
+            startMDNS();
             return;
         }
         logMsg(1, "[WiFi] fail->AP");
@@ -296,7 +324,10 @@ static esp_err_t h_set(httpd_req_t* r) {
     if (httpd_query_key_value(q, "pbFps", v, 8) == ESP_OK) { int n = atoi(v); if (n >= 1 && n <= 60) cfg.pbFps = n; }
     if (httpd_query_key_value(q, "dur", v, 16) == ESP_OK) { uint16_t n = atoi(v); if (n <= 600) cfg.dur = n; }
     if (httpd_query_key_value(q, "lang", v, 4) == ESP_OK) cfg.lang = atoi(v);
-    if (httpd_query_key_value(q, "hostname", vh, 64) == ESP_OK) { String h = vh; h.replace(" ", "_"); h.replace("%20", "_"); cfg.host = h; }
+    if (httpd_query_key_value(q, "hostname", vh, 64) == ESP_OK) {
+        char hs[HOSTNAME_MAX_LABEL + 1];
+        if (sanitizeHostname(vh, hs, sizeof(hs), "femtocam") > 0) cfg.host = hs;
+    }
     saveCfg(); return httpd_resp_sendstr(r, "OK");
 }
 
@@ -364,6 +395,21 @@ static esp_err_t h_loglevel(httpd_req_t* r) {
         int n = atoi(v); if (n >= 0 && n <= 2) logLevel = n; }
     char j[32]; snprintf(j, 32, "{\"level\":%u}", logLevel);
     httpd_resp_set_type(r, "application/json"); return httpd_resp_sendstr(r, j);
+}
+
+// ======== HTTP: mDNS diagnostics ========
+static esp_err_t h_mdns(httpd_req_t* r) {
+    char q[16], v[4];
+    bool restart = (httpd_req_get_url_query_str(r, q, 16) == ESP_OK
+        && httpd_query_key_value(q, "restart", v, 4) == ESP_OK && v[0] == '1');
+    if (restart && !isAP) startMDNS();
+    char host[HOSTNAME_MAX_LABEL + 1];
+    sanitizeHostname(cfg.host.c_str(), host, sizeof(host), "femtocam");
+    char j[200];
+    snprintf(j, 200, "{\"active\":%s,\"hostname\":\"%s\",\"sanitized\":\"%s\",\"mode\":\"%s\",\"url\":\"http://%s.local:%d/\"}",
+        mdns_ok ? "true" : "false", cfg.host.c_str(), host, isAP ? "AP" : "STA", host, PORT_CTRL);
+    httpd_resp_set_type(r, "application/json"); httpd_resp_set_hdr(r, "Access-Control-Allow-Origin", "*");
+    return httpd_resp_sendstr(r, j);
 }
 
 // ======== HTTP: System info ========
@@ -444,7 +490,10 @@ static esp_err_t h_wifi(httpd_req_t* r) {
     if (httpd_req_get_url_query_str(r, q, 400) != ESP_OK) return httpd_resp_sendstr(r, "ERR:no params");
     if (httpd_query_key_value(q, "ssid", v, 128) == ESP_OK) cfg.ssid = v;
     if (httpd_query_key_value(q, "pass", v, 128) == ESP_OK) cfg.pass = v;
-    if (httpd_query_key_value(q, "hostname", v, 128) == ESP_OK) { String h = v; h.replace(" ", "_"); h.replace("%20", "_"); cfg.host = h; }
+    if (httpd_query_key_value(q, "hostname", v, 128) == ESP_OK) {
+        char hs[HOSTNAME_MAX_LABEL + 1];
+        if (sanitizeHostname(v, hs, sizeof(hs), "femtocam") > 0) cfg.host = hs;
+    }
     if (httpd_query_key_value(q, "ip_mode", v, 8) == ESP_OK) cfg.ipm = atoi(v);
     if (httpd_query_key_value(q, "ip", v, 32) == ESP_OK) cfg.sip = v;
     if (httpd_query_key_value(q, "gw", v, 32) == ESP_OK) cfg.sgw = v;
@@ -475,7 +524,7 @@ void startServers() {
             {"/cam", HTTP_GET, h_cam_get, 0}, {"/camset", HTTP_GET, h_cam_set, 0},
             {"/recparams", HTTP_GET, h_rec_get, 0}, {"/recset", HTTP_GET, h_rec_set, 0},
             {"/log", HTTP_GET, h_log, 0}, {"/logclear", HTTP_GET, h_logclear, 0}, {"/loglevel", HTTP_GET, h_loglevel, 0},
-            {"/sysinfo", HTTP_GET, h_sysinfo, 0},
+            {"/sysinfo", HTTP_GET, h_sysinfo, 0}, {"/mdns", HTTP_GET, h_mdns, 0},
         };
         for (auto& x : u) httpd_register_uri_handler(hCtrl, &x);
         logMsg(1, "[HTTP] %d endpoints", (int)(sizeof(u) / sizeof(u[0])));
@@ -517,8 +566,10 @@ void loop() {
         blinkStart(); unsigned long t = millis(); WiFi.reconnect();
         while (WiFi.status() != WL_CONNECTED && millis() - t < STA_TIMEOUT) { esp_task_wdt_reset(); delay(500); }
         blinkStop();
-        if (WiFi.status() == WL_CONNECTED) { ledOff(); logMsg(1, "[WiFi] reconnected RSSI:%d", WiFi.RSSI()); }
-        else { stopRec(); WiFi.disconnect(); WiFi.mode(WIFI_AP); WiFi.softAPConfig(AP_IP, AP_GW, AP_MASK);
+        if (WiFi.status() == WL_CONNECTED) { ledOff(); logMsg(1, "[WiFi] reconnected RSSI:%d", WiFi.RSSI()); startMDNS(); }
+        else { stopRec();
+            if (mdns_ok) { MDNS.end(); mdns_ok = false; }
+            WiFi.disconnect(); WiFi.mode(WIFI_AP); WiFi.softAPConfig(AP_IP, AP_GW, AP_MASK);
             WiFi.softAP(AP_SSID, NULL, 1, 0, 4); WiFi.setTxPower(WIFI_POWER_17dBm); isAP = true; ledOn();
             logMsg(1, "[WiFi] fallback to AP"); }
     }
